@@ -6,7 +6,63 @@ Escriba el codigo que ejecute la accion solicitada en cada pregunta.
 """
 
 
+import os
+import zipfile
+import pandas as pd
+
+
 def pregunta_01():
+
+    # Descomprimir el archivo
+    archivo_zip = zipfile.ZipFile("files/input.zip", "r")
+    archivo_zip.extractall("files")
+    archivo_zip.close()
+
+    # Crear la carpeta output si no existe
+    if not os.path.exists("files/output"):
+        os.mkdir("files/output")
+
+    # Recorrer train y test
+    for conjunto in ["train", "test"]:
+
+        frases = []
+        categorias = []
+
+        ruta_conjunto = os.path.join("files", "input", conjunto)
+
+        # Recorrer las categorías
+        for categoria in ["negative", "neutral", "positive"]:
+
+            ruta_categoria = os.path.join(ruta_conjunto, categoria)
+
+            archivos = os.listdir(ruta_categoria)
+            archivos.sort()
+
+            for nombre_archivo in archivos:
+
+                ruta_archivo = os.path.join(ruta_categoria, nombre_archivo)
+
+                archivo = open(ruta_archivo, "r", encoding="utf-8")
+                frase = archivo.read().strip()
+                archivo.close()
+
+                frases.append(frase)
+                categorias.append(categoria)
+
+        dataframe = pd.DataFrame()
+
+        dataframe["phrase"] = frases
+        dataframe["target"] = categorias
+
+        nombre_archivo = conjunto + "_dataset.csv"
+
+        dataframe.to_csv(
+            os.path.join("files", "output", nombre_archivo),
+            index=False,
+        )
+
+
+
     """
     La información requerida para este laboratio esta almacenada en el
     archivo "files/input.zip" ubicado en la carpeta raíz.
